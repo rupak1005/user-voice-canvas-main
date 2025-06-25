@@ -56,8 +56,8 @@ A full-stack feedback collection app built with React (frontend) and Node.js/Exp
 - `GET /feedback` — Get all feedback
 
 ## Project Structure
-'''
-user-voice-canvas-main/
+
+```user-voice-canvas-main/
 ├── src/
 │ ├── components/
 │ ├── hooks/
@@ -66,7 +66,7 @@ user-voice-canvas-main/
 ├── feedback-backend/
 │ └── server.js
 └── ...
-'''
+```
 ## License
 
 MIT
