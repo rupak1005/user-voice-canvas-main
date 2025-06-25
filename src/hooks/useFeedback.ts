@@ -10,7 +10,7 @@ export const useFeedback = () => {
 
   // Fetch feedback from backend on mount
   useEffect(() => {
-    fetch('http://localhost:4000/feedback')
+    fetch(`${import.meta.env.VITE_API_URL}/feedback`)
       .then(res => res.json())
       .then((data) => {
         // Map backend fields to frontend Feedback type
@@ -66,7 +66,7 @@ export const useFeedback = () => {
 
   // Submit feedback to backend
   const addFeedback = async (newFeedback: Omit<Feedback, 'id' | 'timestamp' | 'status'>) => {
-    const res = await fetch('http://localhost:4000/feedback', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newFeedback),
