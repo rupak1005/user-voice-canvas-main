@@ -1,39 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { Feedback, FeedbackCategory, SortOption } from '@/types/feedback';
-
-const STORAGE_KEY = 'feedback-data';
-
-// Mock data for demonstration
-const mockFeedback: Feedback[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    feedback: 'The application is great but could use a dark mode feature. It would really help during night time usage.',
-    category: 'feature-request',
-    timestamp: new Date('2024-06-20T10:30:00'),
-    status: 'new'
-  },
-  {
-    id: '2',
-    name: 'Sarah Wilson',
-    email: 'sarah@example.com',
-    feedback: 'Found a bug where the form doesn\'t submit properly on mobile devices. The submit button becomes unresponsive.',
-    category: 'bug-report',
-    timestamp: new Date('2024-06-22T14:15:00'),
-    status: 'in-review'
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'mike@example.com',
-    feedback: 'I suggest adding keyboard shortcuts for better navigation. This would greatly improve productivity.',
-    category: 'suggestion',
-    timestamp: new Date('2024-06-24T09:45:00'),
-    status: 'new'
-  }
-];
 
 export const useFeedback = () => {
   const [allFeedback, setAllFeedback] = useState<Feedback[]>([]);
@@ -42,20 +8,23 @@ export const useFeedback = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load feedback from localStorage on mount
+  // Fetch feedback from backend on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsedFeedback = JSON.parse(stored).map((item: any) => ({
-        ...item,
-        timestamp: new Date(item.timestamp)
-      }));
-      setAllFeedback(parsedFeedback);
-    } else {
-      // Use mock data if no stored data
-      setAllFeedback(mockFeedback);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(mockFeedback));
-    }
+    fetch('http://localhost:4000/feedback')
+      .then(res => res.json())
+      .then((data) => {
+        // Map backend fields to frontend Feedback type
+        const mapped = data.map((item: any) => ({
+          id: item._id,
+          name: item.name,
+          email: item.email,
+          feedback: item.feedback,
+          category: item.category,
+          timestamp: new Date(item.createdAt),
+          status: item.status || 'new',
+        }));
+        setAllFeedback(mapped);
+      });
   }, []);
 
   // Filter and sort feedback whenever dependencies change
@@ -95,25 +64,30 @@ export const useFeedback = () => {
     setFilteredFeedback(filtered);
   }, [allFeedback, selectedCategory, sortBy, searchTerm]);
 
-  const addFeedback = (newFeedback: Omit<Feedback, 'id' | 'timestamp' | 'status'>) => {
+  // Submit feedback to backend
+  const addFeedback = async (newFeedback: Omit<Feedback, 'id' | 'timestamp' | 'status'>) => {
+    const res = await fetch('http://localhost:4000/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newFeedback),
+    });
+    if (!res.ok) throw new Error('Failed to submit feedback');
+    const saved = await res.json();
     const feedbackItem: Feedback = {
-      ...newFeedback,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      status: 'new'
+      id: saved._id,
+      name: saved.name,
+      email: saved.email,
+      feedback: saved.feedback,
+      category: saved.category,
+      timestamp: new Date(saved.createdAt),
+      status: saved.status || 'new',
     };
-
-    const updatedFeedback = [feedbackItem, ...allFeedback];
-    setAllFeedback(updatedFeedback);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedFeedback));
+    setAllFeedback(prev => [feedbackItem, ...prev]);
   };
 
+  // Dummy for status update (implement if needed)
   const updateFeedbackStatus = (id: string, status: Feedback['status']) => {
-    const updatedFeedback = allFeedback.map(item =>
-      item.id === id ? { ...item, status } : item
-    );
-    setAllFeedback(updatedFeedback);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedFeedback));
+    // Optionally implement PATCH/PUT to backend
   };
 
   return {
@@ -126,6 +100,6 @@ export const useFeedback = () => {
     searchTerm,
     setSearchTerm,
     addFeedback,
-    updateFeedbackStatus
+    updateFeedbackStatus,
   };
 };

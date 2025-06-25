@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,17 +8,9 @@ import { Label } from '@/components/ui/label';
 import { FeedbackCategory } from '@/types/feedback';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
+import { useFeedback } from '@/hooks/useFeedback';
 
-interface FeedbackFormProps {
-  onSubmit: (feedback: {
-    name: string;
-    email: string;
-    feedback: string;
-    category: FeedbackCategory;
-  }) => void;
-}
-
-export const FeedbackForm = ({ onSubmit }: FeedbackFormProps) => {
+export const FeedbackForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,6 +19,7 @@ export const FeedbackForm = ({ onSubmit }: FeedbackFormProps) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { addFeedback } = useFeedback();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,16 +43,13 @@ export const FeedbackForm = ({ onSubmit }: FeedbackFormProps) => {
     setIsSubmitting(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      onSubmit(formData as typeof formData & { category: FeedbackCategory });
-      
+      await addFeedback(formData as any);
       setFormData({
         name: '',
         email: '',
         feedback: '',
         category: ''
       });
-      
       toast({
         title: "Feedback submitted successfully",
       });
@@ -75,7 +64,7 @@ export const FeedbackForm = ({ onSubmit }: FeedbackFormProps) => {
   };
 
   return (
-    <Card className="glass modern-shadow hover-lift border transition-all duration-300">
+    <Card className="glass modern-shadow  border transition-all duration-300">
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

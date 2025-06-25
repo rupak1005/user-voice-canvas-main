@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/feedback', {
+mongoose.connect("mongodb+srv://rupak1005saini:Qc6a0zDD2Ho77fh1@cluster0.hhap2k3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -16,8 +16,8 @@ mongoose.connect('mongodb://localhost:27017/feedback', {
 // POST /feedback: Submit feedback
 app.post('/feedback', async (req, res) => {
   try {
-    const { name, email, feedback } = req.body;
-    const newFeedback = new Feedback({ name, email, feedback });
+    const { name, email, feedback,category } = req.body;
+    const newFeedback = new Feedback({ name, email, feedback,category });
     await newFeedback.save();
     res.status(201).json(newFeedback);
   } catch (err) {
