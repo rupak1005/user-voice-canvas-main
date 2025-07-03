@@ -55,8 +55,18 @@
     @apply border-border;
   }
 
+  html, body {
+  transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  html.theme-toggling *,
+  html.theme-toggling {
+  transition: none !important;
   }
 
   .light body {
